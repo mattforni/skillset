@@ -1,0 +1,33 @@
+{
+  "name": "skillset",
+  "owner": {
+    "name": "Matthew Fornaciari",
+    "email": "matt@fornaciari.com",
+    "url": "https://github.com/mattforni"
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "description": "A curated collection of Claude Code plugins for enhanced development workflows"
+  },
+  "plugins": [
+    {
+      "name": "linear-lifecycle",
+      "source": "plugins/linear-lifecycle",
+      "version": "1.0.0",
+      "license": "MIT",
+      "description": "Linear issue management using Linearis CLI with zero-context overhead. Track issues, update status, and manage development workflow without loading 20k token MCP servers.",
+      "homepage": "https://github.com/mattforni/skillset",
+      "repository": "https://github.com/mattforni/skillset",
+      "author": {
+        "name": "Matthew Fornaciari",
+        "url": "https://github.com/mattforni"
+      },
+      "category": "development",
+      "keywords": ["linear", "issue-tracking", "cli", "workflow", "linearis", "project-management"],
+      "strict": false,
+      "skills": [
+        "skills/linear-lifecycle/SKILL.md"
+      ]
+    }
+  ]
+}

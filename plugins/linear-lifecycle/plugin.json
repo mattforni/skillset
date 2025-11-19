@@ -1,0 +1,12 @@
+{
+  "name": "linear-lifecycle",
+  "description": "Linear issue management using Linearis CLI with zero-context overhead. Track issues, update status, and manage development workflow without loading 20k token MCP servers.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Matthew Fornaciari",
+    "url": "https://github.com/mattforni"
+  },
+  "repository": "https://github.com/mattforni/skillset",
+  "license": "MIT",
+  "keywords": ["linear", "issue-tracking", "cli", "workflow", "linearis"]
+}

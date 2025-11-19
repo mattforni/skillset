@@ -1,0 +1,194 @@
+name: Validate Plugin Marketplace
+
+on:
+  push:
+    branches: [main, skill/**]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate JSON files
+        run: |
+          echo "Validating JSON syntax..."
+          find . -name "*.json" -type f | while read file; do
+            echo "Checking $file"
+            jq empty "$file" || exit 1
+          done
+
+      - name: Validate marketplace.json structure
+        run: |
+          echo "Validating marketplace.json structure..."
+
+          # Check required fields exist
+          jq -e '.name' .claude-plugin/marketplace.json > /dev/null || { echo "Missing 'name' field"; exit 1; }
+          jq -e '.owner' .claude-plugin/marketplace.json > /dev/null || { echo "Missing 'owner' field"; exit 1; }
+          jq -e '.metadata' .claude-plugin/marketplace.json > /dev/null || { echo "Missing 'metadata' field"; exit 1; }
+          jq -e '.plugins' .claude-plugin/marketplace.json > /dev/null || { echo "Missing 'plugins' field"; exit 1; }
+
+          echo "Marketplace structure is valid"
+
+      - name: Validate plugin.json files
+        run: |
+          echo "Validating plugin.json files..."
+
+          find plugins -name "plugin.json" -type f | while read file; do
+            echo "Validating $file"
+
+            # Check required fields
+            jq -e '.name' "$file" > /dev/null || { echo "Missing 'name' in $file"; exit 1; }
+            jq -e '.version' "$file" > /dev/null || { echo "Missing 'version' in $file"; exit 1; }
+            jq -e '.description' "$file" > /dev/null || { echo "Missing 'description' in $file"; exit 1; }
+            jq -e '.author' "$file" > /dev/null || { echo "Missing 'author' in $file"; exit 1; }
+
+            echo "$file is valid"
+          done
+
+      - name: Validate plugin references
+        run: |
+          echo "Validating plugin source paths..."
+
+          # Check that all plugins in marketplace.json have corresponding directories
+          jq -r '.plugins[].source' .claude-plugin/marketplace.json | while read source; do
+            # Remove leading ./ if present
+            clean_source="${source#./}"
+
+            if [ ! -d "$clean_source" ]; then
+              echo "Error: Plugin directory '$clean_source' referenced in marketplace.json does not exist"
+              exit 1
+            fi
+
+            if [ ! -f "$clean_source/plugin.json" ]; then
+              echo "Error: Plugin '$clean_source' is missing plugin.json"
+              exit 1
+            fi
+
+            echo "✓ Plugin '$clean_source' exists and has plugin.json"
+          done
+
+      - name: Validate skill paths
+        run: |
+          echo "Validating skill file paths..."
+
+          # For each plugin, check that referenced skills exist
+          find plugins -name "plugin.json" -type f | while read plugin_file; do
+            plugin_dir=$(dirname "$plugin_file")
+
+            # Check if skills are referenced in marketplace.json for this plugin
+            plugin_name=$(jq -r '.name' "$plugin_file")
+
+            # Get skills from marketplace.json
+            jq -r ".plugins[] | select(.name == \"$plugin_name\") | .skills[]?" .claude-plugin/marketplace.json 2>/dev/null | while read skill_path; do
+              if [ -n "$skill_path" ]; then
+                # Remove leading ./ if present
+                clean_path="${skill_path#./}"
+                full_path="$plugin_dir/$clean_path"
+
+                if [ ! -f "$full_path" ]; then
+                  echo "Error: Skill file '$full_path' referenced in marketplace.json does not exist"
+                  exit 1
+                fi
+
+                echo "✓ Skill file '$full_path' exists"
+              fi
+            done
+          done
+
+      - name: Validate shell scripts
+        run: |
+          echo "Validating shell scripts..."
+
+          find . -name "*.sh" -type f | while read script; do
+            echo "Checking $script"
+            bash -n "$script" || exit 1
+            echo "✓ $script syntax is valid"
+          done
+
+      - name: Check for required documentation
+        run: |
+          echo "Checking for required documentation..."
+
+          # Check root README
+          [ -f "README.md" ] || { echo "Missing README.md"; exit 1; }
+          echo "✓ README.md exists"
+
+          # Check LICENSE
+          [ -f "LICENSE" ] || { echo "Missing LICENSE"; exit 1; }
+          echo "✓ LICENSE exists"
+
+          # Check contributing guide
+          [ -f "docs/contributing.md" ] || { echo "Missing docs/contributing.md"; exit 1; }
+          echo "✓ docs/contributing.md exists"
+
+          # Check that each plugin has documentation
+          jq -r '.plugins[].name' .claude-plugin/marketplace.json | while read plugin_name; do
+            doc_file="docs/plugins/${plugin_name}.md"
+            if [ ! -f "$doc_file" ]; then
+              echo "Warning: Missing documentation for plugin '$plugin_name' at $doc_file"
+            else
+              echo "✓ Documentation exists for $plugin_name"
+            fi
+          done
+
+      - name: Validate version format
+        run: |
+          echo "Validating semantic versioning..."
+
+          # Check marketplace version
+          marketplace_version=$(jq -r '.metadata.version' .claude-plugin/marketplace.json)
+          if ! echo "$marketplace_version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "Error: Marketplace version '$marketplace_version' is not valid semver"
+            exit 1
+          fi
+          echo "✓ Marketplace version is valid: $marketplace_version"
+
+          # Check plugin versions
+          find plugins -name "plugin.json" -type f | while read file; do
+            version=$(jq -r '.version' "$file")
+            if ! echo "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+              echo "Error: Plugin version '$version' in $file is not valid semver"
+              exit 1
+            fi
+            echo "✓ Plugin version is valid: $version"
+          done
+
+      - name: Check for common issues
+        run: |
+          echo "Checking for common issues..."
+
+          # Check for hardcoded secrets
+          if grep -r "lin_api_" plugins/ --include="*.md" --include="*.json" 2>/dev/null | grep -v "lin_api_your_token_here" | grep -v "lin_api_..."; then
+            echo "Error: Found potential hardcoded API tokens"
+            exit 1
+          fi
+          echo "✓ No hardcoded secrets found"
+
+          # Check for executable scripts
+          find plugins -name "*.sh" -type f | while read script; do
+            if [ ! -x "$script" ]; then
+              echo "Warning: Script $script is not executable"
+            else
+              echo "✓ Script $script is executable"
+            fi
+          done
+
+      - name: Summary
+        run: |
+          echo "================================"
+          echo "All validation checks passed! ✓"
+          echo "================================"
+
+          echo ""
+          echo "Marketplace Summary:"
+          echo "  Name: $(jq -r '.name' .claude-plugin/marketplace.json)"
+          echo "  Version: $(jq -r '.metadata.version' .claude-plugin/marketplace.json)"
+          echo "  Plugins: $(jq -r '.plugins | length' .claude-plugin/marketplace.json)"
+          echo ""
+          echo "Plugins:"
+          jq -r '.plugins[] | "  - \(.name) v\(.version) (\(.category))"' .claude-plugin/marketplace.json

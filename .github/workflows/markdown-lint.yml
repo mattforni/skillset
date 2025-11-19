@@ -1,0 +1,56 @@
+name: Markdown Linting
+
+on:
+  push:
+    branches: [main, skill/**]
+  pull_request:
+    branches: [main]
+
+jobs:
+  markdown-lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install markdownlint-cli
+        run: npm install -g markdownlint-cli
+
+      - name: Create markdownlint config
+        run: |
+          cat > .markdownlint.json << 'EOF'
+          {
+            "default": true,
+            "MD013": false,
+            "MD033": false,
+            "MD041": false
+          }
+          EOF
+
+      - name: Run markdownlint
+        run: markdownlint '**/*.md' --ignore node_modules --ignore .git
+
+      - name: Check for broken links (basic)
+        run: |
+          echo "Checking for obvious broken internal links..."
+
+          # Check that referenced files exist
+          grep -r "\[.*\](docs/" . --include="*.md" | grep -v ".git" | while IFS=: read -r file link; do
+            # Extract the path from markdown link
+            path=$(echo "$link" | sed -n 's/.*(\(docs\/[^)]*\)).*/\1/p')
+
+            if [ -n "$path" ]; then
+              if [ ! -f "$path" ]; then
+                echo "Error: Broken link in $file -> $path does not exist"
+                exit 1
+              fi
+            fi
+          done
+
+          echo "✓ No broken internal links found"

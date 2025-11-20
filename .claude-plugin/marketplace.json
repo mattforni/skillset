@@ -15,7 +15,7 @@
       "source": "./plugins/linear-lifecycle",
       "version": "1.0.0",
       "license": "MIT",
-      "description": "Linear issue management using Linearis CLI with zero-context overhead. Track issues, update status, and manage development workflow without loading 20k token MCP servers.",
+      "description": "Manage Linear issues via Linearis CLI with zero-context overhead. Create, update, and track issues without loading large MCPs.",
       "homepage": "https://github.com/mattforni/skillset",
       "repository": "https://github.com/mattforni/skillset",
       "author": {
@@ -27,6 +27,9 @@
       "strict": false,
       "skills": [
         "skills/linear-lifecycle/SKILL.md"
+      ],
+      "commands": [
+        "commands/setup-linear.md"
       ]
     }
   ]

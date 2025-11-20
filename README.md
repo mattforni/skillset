@@ -30,7 +30,7 @@ Linear issue management using Linearis CLI with zero-context overhead.
 **Installation:**
 
 ```bash
-claude plugin install linear-lifecycle@github:mattforni/skillset
+claude plugin install linear-lifecycle@mattforni/skillset
 ```
 
 [Full documentation →](docs/plugins/linear-lifecycle.md)

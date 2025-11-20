@@ -15,12 +15,9 @@ description: Use when working with Linear issues across development workflow - u
 
 ## Setup (One-Time Per Project)
 
-**Automated setup script (recommended):**
+**Automated setup (recommended):**
 
-```bash
-# In your project directory
-~/.claude/plugins/cache/linear-lifecycle/skills/linear-lifecycle/scripts/setup.sh
-```
+Use the `/setup-linear` command in Claude Code to run the setup interactively.
 
 This script will:
 
@@ -238,7 +235,7 @@ linearis comments create BET-789 --body "Completed auth refactor. Moved from Con
 **Command:**
 
 ```bash
-linearis issues search "authentication" --team [team-name] | jq '.[] | select(.labels[]? | contains("bug")) | {id: .identifier, title: .title, state: .state.name}'
+linearis issues search "authentication" --team "$LINEAR_TEAM_KEY" | jq '.[] | select(.labels[]? | contains("bug")) | {id: .identifier, title: .title, state: .state.name}'
 ```
 
 **Parse and format results as table.**

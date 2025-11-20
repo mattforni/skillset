@@ -50,10 +50,10 @@ After installing the plugin, configure it for each project where you want Linear
 
 ### Automated Setup (Recommended)
 
-Run the setup script from your project directory:
+Run the setup command in Claude Code:
 
-```bash
-~/.claude/plugins/cache/linear-lifecycle/skills/linear-lifecycle/scripts/setup.sh
+```
+/setup-linear
 ```
 
 This will:

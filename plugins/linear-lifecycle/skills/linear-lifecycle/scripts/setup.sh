@@ -116,9 +116,9 @@ if [ $? -eq 0 ]; then
 
     # Save team key to .env.local if not already there
     if grep -q "^LINEAR_TEAM_KEY=" .env.local; then
-      # Update existing team key
-      sed -i.bak "s/^LINEAR_TEAM_KEY=.*/LINEAR_TEAM_KEY=$TEAM_KEY/" .env.local
-      rm -f .env.local.bak
+      # Update existing team key (portable across macOS and Linux)
+      sed "s/^LINEAR_TEAM_KEY=.*/LINEAR_TEAM_KEY=$TEAM_KEY/" .env.local > .env.local.tmp
+      mv .env.local.tmp .env.local
       echo "  ✓ Updated LINEAR_TEAM_KEY in .env.local"
     else
       # Add new team key

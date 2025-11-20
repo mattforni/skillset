@@ -27,8 +27,8 @@ cd skillset
 # Install git hooks (markdown linting, JSON validation, etc.)
 ./scripts/install-hooks.sh
 
-# Add the local marketplace to Claude
-claude plugin marketplace add local --path /path/to/skillset
+# Add the local marketplace to Claude (run from repo root)
+claude plugin marketplace add local --path .
 
 # Install a plugin locally for testing
 claude plugin install linear-lifecycle@local

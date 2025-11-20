@@ -26,10 +26,10 @@
       "keywords": ["linear", "issue-tracking", "cli", "workflow", "linearis", "project-management"],
       "strict": false,
       "skills": [
-        "skills/linear-lifecycle/SKILL.md"
+        "./skills/linear-lifecycle/SKILL.md"
       ],
       "commands": [
-        "commands/setup-linear.md"
+        "./commands/setup-linear.md"
       ]
     }
   ]

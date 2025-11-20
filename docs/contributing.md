@@ -180,7 +180,7 @@ Brief description
 claude plugin install your-plugin-name@mattforni/skillset
 ```
 
-[Full documentation →](docs/plugins/your-plugin-name.md)
+See the full documentation at `docs/plugins/your-plugin-name.md`
 
 ## Plugin Development Best Practices
 

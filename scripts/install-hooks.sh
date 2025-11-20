@@ -42,6 +42,17 @@ else
   echo "✓ markdownlint-cli already installed"
 fi
 
+if ! command -v jq &> /dev/null; then
+  echo ""
+  echo "⚠️  jq is not installed"
+  echo ""
+  echo "The pre-commit hook requires jq for JSON validation."
+  echo "Please install it with your system's package manager."
+  echo "e.g. 'brew install jq' or 'sudo apt-get install jq'"
+else
+  echo "✓ jq already installed"
+fi
+
 echo ""
 echo "Git hooks installation complete!"
 echo ""

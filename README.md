@@ -80,6 +80,8 @@ skillset/
 ├── plugins/
 │   └── linear-lifecycle/         # Individual plugin
 │       ├── plugin.json           # Plugin metadata
+│       ├── commands/             # Plugin commands
+│       │   └── setup-linear.md
 │       └── skills/               # Plugin skills
 │           └── linear-lifecycle/
 │               ├── SKILL.md      # Skill documentation

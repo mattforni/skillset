@@ -7,14 +7,24 @@ set -e
 echo "🔧 Linear Lifecycle Setup"
 echo ""
 
-# Step 1: Check/Install Linearis CLI
-echo "Step 1: Checking Linearis CLI..."
+# Step 1: Check/Install Dependencies
+echo "Step 1: Checking Dependencies..."
 if ! command -v linearis &> /dev/null; then
   echo "  Linearis not found. Installing globally via npm..."
   npm install -g linearis
   echo "  ✓ Linearis installed"
 else
   echo "  ✓ Linearis already installed"
+fi
+
+if ! command -v jq &> /dev/null; then
+  echo "  ⚠️  jq is not installed, but it's required to run this script."
+  echo "     Please install it first. For example:"
+  echo "       - macOS: brew install jq"
+  echo "       - Debian/Ubuntu: sudo apt-get install jq"
+  exit 1
+else
+  echo "  ✓ jq is already installed"
 fi
 
 echo ""

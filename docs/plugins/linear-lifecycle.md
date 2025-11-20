@@ -34,6 +34,14 @@ The `linear-lifecycle` plugin enables Claude to manage Linear issues efficiently
 - Never committed to git (auto-gitignored)
 - Same pattern as other secrets (Supabase, etc.)
 
+## Requirements
+
+- Node.js and npm (for Linearis CLI installation)
+- `jq` - JSON processor for parsing Linear API responses
+  - macOS: `brew install jq`
+  - Debian/Ubuntu: `sudo apt-get install jq`
+  - Other systems: See [jq installation guide](https://jqlang.github.io/jq/download/)
+
 ## Installation
 
 ```bash

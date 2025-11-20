@@ -29,7 +29,7 @@
         "./skills/linear-lifecycle/SKILL.md"
       ],
       "commands": [
-        "./commands/setup-linear.md"
+        "./commands/linear-setup.md"
       ]
     }
   ]

@@ -13,9 +13,11 @@ This marketplace provides focused, single-purpose plugins that extend Claude Cod
 ### Development
 
 #### linear-lifecycle
+
 Linear issue management using Linearis CLI with zero-context overhead.
 
 **Features:**
+
 - Get issue details when starting work
 - Create new issues from discovered bugs/features
 - Update issue status during development
@@ -26,6 +28,7 @@ Linear issue management using Linearis CLI with zero-context overhead.
 **Context savings:** 100% (uses CLI instead of 20k token MCP)
 
 **Installation:**
+
 ```bash
 claude plugin install linear-lifecycle@github:mattforni/skillset
 ```
@@ -93,12 +96,15 @@ skillset/
 ## Plugin Categories
 
 ### Development
+
 Tools and workflows for software development
 
 **Current plugins:**
+
 - linear-lifecycle (Issue tracking and project management)
 
 **Coming soon:**
+
 - github-workflow (PR management without MCP overhead)
 - notion-lifecycle (Documentation and notes management)
 - More to be added...
@@ -120,16 +126,19 @@ See [contributing guidelines](docs/contributing.md) for detailed instructions.
 
 **Minimal Context Usage**
 Each plugin minimizes token consumption through:
+
 - CLI tools instead of MCP servers when possible
 - Progressive disclosure for documentation
 - Focused, single-purpose functionality
 
 **Modular Architecture**
+
 - Install only what you need
 - No dependencies between plugins
 - Each plugin is self-contained
 
 **Production Ready**
+
 - Tested workflows
 - Clear documentation
 - Real-world usage patterns
@@ -143,6 +152,7 @@ Each plugin minimizes token consumption through:
 ## Contributing
 
 Contributions are welcome! Whether you want to:
+
 - Add a new plugin
 - Improve existing plugins
 - Fix bugs or enhance documentation
@@ -159,11 +169,13 @@ Individual plugins may have additional licenses or dependencies. Check each plug
 ## Author
 
 **Matthew Fornaciari**
+
 - GitHub: [@mattforni](https://github.com/mattforni)
 
 ## Acknowledgments
 
 Inspired by:
+
 - [wshobson/agents](https://github.com/wshobson/agents) - Marketplace structure and organization
 - [Linearis](https://github.com/czottmann/linearis) - Linear CLI for LLM agents by Carlo Zottmann
 

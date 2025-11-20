@@ -23,6 +23,7 @@ description: Use when working with Linear issues across development workflow - u
 ```
 
 This script will:
+
 1. Install Linearis CLI if not present
 2. Prompt for your Linear API token
 3. Auto-detect your team key from Linear
@@ -47,6 +48,7 @@ echo ".env.local" >> .gitignore
 ```
 
 **Why project-local .env.local:**
+
 - Each project has its own workspace token
 - No manual workspace switching needed
 - Token auto-detected from current directory
@@ -56,6 +58,7 @@ echo ".env.local" >> .gitignore
 ## When to Use
 
 **Use this pattern when:**
+
 - Starting work on a Linear issue (need issue details)
 - Creating new issues from bugs or features discovered
 - Updating issue status during development
@@ -63,6 +66,7 @@ echo ".env.local" >> .gitignore
 - Searching for issues across teams/projects
 
 **Don't use when:**
+
 - Issue tracking not needed for current work
 - Working on non-Linear projects
 
@@ -78,6 +82,7 @@ echo ".env.local" >> .gitignore
 4. Verify token works with a quick linearis call
 
 **Implementation:**
+
 ```bash
 # Check for .env.local and load it
 if [ -f .env.local ]; then
@@ -93,6 +98,7 @@ fi
 ```
 
 **Response pattern:**
+
 ```markdown
 Found LINEAR_API_TOKEN in .env.local
 Using Linear workspace for this project.
@@ -100,6 +106,7 @@ Proceeding with [operation]...
 ```
 
 **If token not found:**
+
 ```markdown
 ⚠️ LINEAR_API_TOKEN not found in .env.local
 
@@ -130,6 +137,7 @@ This loads LINEAR_API_TOKEN and LINEAR_TEAM_KEY into the environment for all sub
 **User request:** "Create a Linear issue for fixing the avatar crop bug"
 
 **Command:**
+
 ```bash
 linearis issues create "Fix avatar crop bug" \
   --team "$LINEAR_TEAM_KEY" \
@@ -137,6 +145,7 @@ linearis issues create "Fix avatar crop bug" \
 ```
 
 **Key rules:**
+
 - ✅ Use `--team "$LINEAR_TEAM_KEY"` (auto-detected during setup)
 - ✅ Keep description clear and concise
 - ❌ NEVER use --labels (causes errors)
@@ -144,12 +153,14 @@ linearis issues create "Fix avatar crop bug" \
 - ❌ NEVER hardcode team key (use variable)
 
 **Parse response:**
+
 ```bash
 # Returns JSON with: {identifier, title, url, ...}
 # Extract: issue ID (e.g., BET-145) and URL
 ```
 
 **Response to user:**
+
 ```markdown
 ✓ Created issue BET-145: Fix avatar crop bug
 https://linear.app/your-workspace/issue/BET-145
@@ -160,11 +171,13 @@ https://linear.app/your-workspace/issue/BET-145
 **User request:** "Start working on bet-123"
 
 **Command:**
+
 ```bash
 linearis issues read BET-123
 ```
 
 **Parse JSON response for:**
+
 - title
 - description
 - state (current status)
@@ -173,6 +186,7 @@ linearis issues read BET-123
 - branchName (suggested git branch)
 
 **Response to user:**
+
 ```markdown
 Issue: BET-123 - [Title]
 Status: [State]
@@ -190,11 +204,13 @@ Creating branch [branch-name]...
 **User request:** "Update bet-456 to in progress"
 
 **Command:**
+
 ```bash
 linearis issues update BET-456 --state "In Progress"
 ```
 
 **Response:**
+
 ```markdown
 ✓ Updated BET-456 to In Progress
 ```
@@ -204,11 +220,13 @@ linearis issues update BET-456 --state "In Progress"
 **User request:** "Add comment to bet-789 about the refactor being done"
 
 **Command:**
+
 ```bash
 linearis comments create BET-789 --body "Completed auth refactor. Moved from Context API to Zustand for better performance. All tests passing."
 ```
 
 **Response:**
+
 ```markdown
 ✓ Added comment to BET-789
 ```
@@ -218,6 +236,7 @@ linearis comments create BET-789 --body "Completed auth refactor. Moved from Con
 **User request:** "Find all open bugs with label 'authentication'"
 
 **Command:**
+
 ```bash
 linearis issues search "authentication" --team [team-name] | jq '.[] | select(.labels[]? | contains("bug")) | {id: .identifier, title: .title, state: .state.name}'
 ```
@@ -229,6 +248,7 @@ linearis issues search "authentication" --team [team-name] | jq '.[] | select(.l
 **User request:** "Close bet-789, PR merged"
 
 **Commands:**
+
 ```bash
 # 1. Add completion comment
 linearis comments create BET-789 --body "Feature complete. PR #456 merged to main."
@@ -238,6 +258,7 @@ linearis issues update BET-789 --state "Done"
 ```
 
 **Response:**
+
 ```markdown
 ✓ Marked BET-789 as Done
 ✓ Added completion comment
@@ -258,35 +279,42 @@ linearis issues update BET-789 --state "Done"
 ## Common Mistakes
 
 **Forgetting workspace detection**
+
 - ❌ Don't skip LINEAR_API_TOKEN check on first operation
 - ✅ Always verify workspace once per session
 
 **Not parsing JSON output**
+
 - ❌ Don't show raw JSON to user
 - ✅ Parse and format relevant fields cleanly
 
 **Hardcoding team/project names**
+
 - ❌ Don't assume team structure
 - ✅ Let user specify or discover via linearis commands
 
 **Using issue IDs incorrectly**
+
 - ❌ Don't lowercase (bet-123) in commands
 - ✅ Use proper case (BET-123) - linearis handles both but be consistent
 
 ## Real-World Impact
 
 **Before (Linear MCP):**
+
 - 20k tokens consumed at session start
 - All tools loaded in context
 - Context budget: 180k/200k remaining
 
 **After (Linearis CLI):**
+
 - 0 tokens in session (just bash commands)
 - JSON parsing lightweight
 - Context budget: 200k/200k remaining
 - **100% context savings**
 
 **Performance:**
+
 - Linearis usage docs: ~1000 tokens
 - MCP tool definitions: ~13000 tokens
 - **92% reduction even for reference material**
@@ -294,12 +322,14 @@ linearis issues update BET-789 --state "Done"
 ## Advanced: Multi-Team Operations
 
 **List issues across teams:**
+
 ```bash
 linearis issues list --team Frontend -l 5
 linearis issues list --team Backend -l 5
 ```
 
 **Create issue in specific team:**
+
 ```bash
 linearis issues create "Fix API timeout" --team Backend
 ```

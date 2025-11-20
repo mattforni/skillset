@@ -11,12 +11,14 @@ The `linear-lifecycle` plugin enables Claude to manage Linear issues efficiently
 ## Features
 
 ### Zero Context Overhead
+
 - Uses Linearis CLI instead of 20k token Linear MCP
 - Returns structured JSON for parsing
 - Saves ~92% of context even for reference material
 - 200k/200k tokens remain available for actual work
 
 ### Complete Linear Workflow Integration
+
 - Get issue details when starting work
 - Create new issues from discovered bugs/features
 - Update issue status during development
@@ -25,6 +27,7 @@ The `linear-lifecycle` plugin enables Claude to manage Linear issues efficiently
 - Close issues when work is complete
 
 ### Project-Local Configuration
+
 - Each project has its own `.env.local` with workspace token
 - No manual workspace switching needed
 - Token auto-detected from current directory
@@ -54,6 +57,7 @@ Run the setup script from your project directory:
 ```
 
 This will:
+
 1. Install Linearis CLI if not present
 2. Prompt for your Linear API token
 3. Auto-detect your team key from Linear
@@ -154,6 +158,7 @@ Feature complete. PR #456 merged to main.
 ## How It Works
 
 The skill:
+
 1. Sources `.env.local` to load `LINEAR_API_TOKEN` and `LINEAR_TEAM_KEY`
 2. Executes Linearis CLI commands with appropriate flags
 3. Parses JSON responses to extract relevant information
@@ -163,11 +168,13 @@ The skill:
 ## Performance Comparison
 
 ### Before (Linear MCP)
+
 - 20k tokens consumed at session start
 - All tools loaded in context
 - Context budget: 180k/200k remaining (10% overhead)
 
 ### After (Linearis CLI via this plugin)
+
 - 0 tokens in session (just bash commands)
 - JSON parsing lightweight (~100 tokens per operation)
 - Context budget: 200k/200k remaining (0% overhead)

@@ -5,6 +5,7 @@ Thank you for your interest in contributing! This guide will help you add new pl
 ## Overview
 
 Skillset is a marketplace for focused, single-purpose Claude Code plugins. Each plugin should:
+
 - Solve one specific problem well
 - Minimize context token usage
 - Follow consistent structure and conventions
@@ -23,6 +24,9 @@ cd skillset
 ### Local Development Setup
 
 ```bash
+# Install git hooks (markdown linting, JSON validation, etc.)
+./scripts/install-hooks.sh
+
 # Add the local marketplace to Claude
 claude plugin marketplace add local --path /path/to/skillset
 
@@ -30,11 +34,20 @@ claude plugin marketplace add local --path /path/to/skillset
 claude plugin install linear-lifecycle@local
 ```
 
+**Pre-commit Hook:** The pre-commit hook automatically validates:
+
+- Markdown files (using markdownlint)
+- JSON files (syntax validation)
+- Shell scripts (bash syntax check)
+
+This prevents pushing code that will fail CI checks. To bypass the hook for a specific commit, use `git commit --no-verify`.
+
 ## Adding a New Plugin
 
 ### 1. Plan Your Plugin
 
 Before coding, consider:
+
 - **Purpose**: What single problem does it solve?
 - **Context efficiency**: Can you use CLI tools instead of MCP?
 - **User workflow**: How will users interact with it?
@@ -52,7 +65,7 @@ cd plugins/your-plugin-name
 
 Your plugin can contain any combination of:
 
-```
+```text
 your-plugin-name/
 ├── plugin.json          # Required: Plugin metadata
 ├── skills/              # Optional: Autonomous capabilities
@@ -168,13 +181,13 @@ claude plugin install your-plugin-name@mattforni/skillset
 ```
 
 [Full documentation →](docs/plugins/your-plugin-name.md)
-```
 
 ## Plugin Development Best Practices
 
 ### Context Efficiency
 
 **Prefer CLI over MCP when possible:**
+
 ```markdown
 ✅ Use: Lightweight CLI tools with JSON output
 ❌ Avoid: Heavy MCP servers that load 10k+ tokens
@@ -185,20 +198,24 @@ claude plugin install your-plugin-name@mattforni/skillset
 ### Skills vs Commands vs Agents
 
 **Skills** - Claude invokes autonomously based on context
+
 - Use for: Workflows Claude should recognize automatically
 - Example: Detecting when user mentions a Linear issue
 
 **Commands** - User invokes explicitly with `/command-name`
+
 - Use for: Specific operations user triggers deliberately
 - Example: `/setup-linear` to configure credentials
 
 **Agents** - Specialized subprocesses for complex tasks
+
 - Use for: Multi-step operations requiring focused context
 - Example: Analyzing security vulnerabilities across codebase
 
 ### Progressive Disclosure
 
 Structure documentation in tiers:
+
 1. **Metadata** (always loaded): Name, description, when to use
 2. **Instructions** (loaded on activation): Core workflow steps
 3. **Resources** (on-demand): Examples, templates, advanced usage
@@ -206,11 +223,13 @@ Structure documentation in tiers:
 ### Version Management
 
 Use semantic versioning:
+
 - **Major** (1.0.0 → 2.0.0): Breaking changes
 - **Minor** (1.0.0 → 1.1.0): New features, backward compatible
 - **Patch** (1.0.0 → 1.0.1): Bug fixes
 
 Update versions in:
+
 1. `plugins/your-plugin/plugin.json`
 2. `.claude-plugin/marketplace.json`
 
@@ -231,6 +250,7 @@ claude plugin install your-plugin-name@local
 ### Validation Checklist
 
 Before submitting:
+
 - [ ] Plugin installs without errors
 - [ ] All skills/commands/agents work correctly
 - [ ] Documentation is complete and accurate
@@ -255,6 +275,7 @@ git commit -m "feat: add your-plugin-name for [purpose]"
 ```
 
 Use conventional commit messages:
+
 - `feat:` New plugin or feature
 - `fix:` Bug fix
 - `docs:` Documentation changes
@@ -267,6 +288,7 @@ git push origin add-your-plugin-name
 ```
 
 Then create a PR on GitHub with:
+
 - Clear description of what the plugin does
 - Why it's useful
 - Screenshots/examples if applicable
@@ -321,6 +343,7 @@ By contributing, you agree that your contributions will be licensed under the MI
 ## Recognition
 
 Contributors will be:
+
 - Listed in plugin.json as authors
 - Mentioned in release notes
 - Recognized in the README

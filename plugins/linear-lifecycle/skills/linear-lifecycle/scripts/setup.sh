@@ -65,7 +65,8 @@ if [ "$NEED_TOKEN" = true ]; then
   echo "    2. Go to: Settings → Security & Access → Personal API keys"
   echo "    3. Create a new API key"
   echo ""
-  read -p "  Enter LINEAR_API_TOKEN: " LINEAR_API_TOKEN
+  read -sp "  Enter LINEAR_API_TOKEN: " LINEAR_API_TOKEN
+  echo ""
 
   # Validate token format
   if [[ ! $LINEAR_API_TOKEN =~ ^lin_api_ ]]; then

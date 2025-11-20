@@ -1,5 +1,5 @@
 ---
-name: setup-linear
+name: linear-setup
 description: Configure Linear API token and team key for the linear-lifecycle plugin
 ---
 

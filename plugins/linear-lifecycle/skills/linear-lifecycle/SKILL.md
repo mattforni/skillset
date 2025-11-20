@@ -79,9 +79,9 @@ echo ".env.local" >> .gitignore
 
 **Implementation:**
 ```bash
-# Check for .env.local and load LINEAR_API_TOKEN
+# Check for .env.local and load it
 if [ -f .env.local ]; then
-  export $(grep -v '^#' .env.local | grep LINEAR_API_TOKEN | xargs)
+  source .env.local
 fi
 
 # If still not set, prompt user

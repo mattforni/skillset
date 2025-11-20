@@ -98,8 +98,8 @@ Update `.claude-plugin/marketplace.json`:
       "version": "1.0.0",
       "license": "MIT",
       "description": "Concise description matching plugin.json",
-      "homepage": "https://github.com/forni/skillset",
-      "repository": "https://github.com/forni/skillset",
+      "homepage": "https://github.com/mattforni/skillset",
+      "repository": "https://github.com/mattforni/skillset",
       "author": {
         "name": "Your Name",
         "url": "https://github.com/yourusername"
@@ -163,9 +163,9 @@ Brief description
 **Context savings:** X% (explanation)
 
 **Installation:**
-\`\`\`bash
+```bash
 claude plugin install your-plugin-name@mattforni/skillset
-\`\`\`
+```
 
 [Full documentation →](docs/plugins/your-plugin-name.md)
 ```

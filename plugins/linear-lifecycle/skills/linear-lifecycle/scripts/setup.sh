@@ -101,7 +101,7 @@ echo ""
 echo "Step 4: Verifying setup and detecting team..."
 
 # Load token from .env.local
-export $(grep -v '^#' .env.local | grep LINEAR_API_TOKEN | xargs)
+source .env.local
 
 # Test linearis and get team key
 TEAM_RESPONSE=$(linearis issues list -l 1 2>&1)
@@ -109,7 +109,7 @@ if [ $? -eq 0 ]; then
   echo "  ✓ Successfully connected to Linear API"
 
   # Extract team key from response
-  TEAM_KEY=$(echo "$TEAM_RESPONSE" | grep -o '"key": "[^"]*"' | head -1 | cut -d'"' -f4)
+  TEAM_KEY=$(echo "$TEAM_RESPONSE" | jq -r '.[0].team.key')
 
   if [ -n "$TEAM_KEY" ]; then
     echo "  ✓ Detected team key: $TEAM_KEY"

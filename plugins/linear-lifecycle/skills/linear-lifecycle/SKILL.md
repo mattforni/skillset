@@ -17,7 +17,7 @@ description: Use when working with Linear issues across development workflow - u
 
 **Automated setup (recommended):**
 
-Use the `/setup-linear` command in Claude Code to run the setup interactively.
+Use the `/linear-setup` command in Claude Code to run the setup interactively.
 
 This script will:
 
@@ -108,7 +108,7 @@ Proceeding with [operation]...
 ⚠️ LINEAR_API_TOKEN not found in .env.local
 
 Run the setup script to configure Linear for this project:
-  ~/.claude/plugins/cache/linear-lifecycle/skills/linear-lifecycle/scripts/setup.sh
+  ~/.claude/plugins/marketplaces/skillset/plugins/linear-lifecycle/skills/linear-lifecycle/scripts/setup.sh
 
 Or manually:
   Get token from: Linear Settings → Security & Access → Personal API keys

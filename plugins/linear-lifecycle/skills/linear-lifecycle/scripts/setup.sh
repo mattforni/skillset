@@ -32,6 +32,30 @@ echo ""
 # Step 2: Configure LINEAR_API_TOKEN in .env.local
 echo "Step 2: Configuring LINEAR_API_TOKEN..."
 
+# Check for LINEAR_API_KEY and offer migration to LINEAR_API_TOKEN
+if [ -f .env.local ] && grep -q "^LINEAR_API_KEY=" .env.local && ! grep -q "^LINEAR_API_TOKEN=" .env.local; then
+  echo "  ℹ️  Found LINEAR_API_KEY in .env.local"
+  echo ""
+  echo "  Linearis CLI uses LINEAR_API_TOKEN instead of LINEAR_API_KEY."
+  echo "  Would you like to migrate your configuration?"
+  echo ""
+  read -p "  Migrate LINEAR_API_KEY → LINEAR_API_TOKEN? (Y/n): " MIGRATE_KEY
+
+  if [[ ! $MIGRATE_KEY =~ ^[Nn]$ ]]; then
+    # Extract the key value
+    API_KEY=$(grep "^LINEAR_API_KEY=" .env.local | cut -d'=' -f2)
+
+    # Add LINEAR_API_TOKEN with the same value
+    echo "LINEAR_API_TOKEN=$API_KEY" >> .env.local
+    echo "  ✓ Added LINEAR_API_TOKEN to .env.local"
+    echo "  ✓ Original LINEAR_API_KEY preserved for compatibility"
+    echo ""
+  else
+    echo "  Skipped migration. Note: Linearis CLI requires LINEAR_API_TOKEN."
+    NEED_TOKEN=true
+  fi
+fi
+
 # Check if .env.local exists and has token
 if [ -f .env.local ] && grep -q "^LINEAR_API_TOKEN=" .env.local; then
   echo "  ✓ LINEAR_API_TOKEN already configured in .env.local"
@@ -114,16 +138,23 @@ echo "Step 4: Verifying setup and detecting team..."
 # Load token from .env.local
 source .env.local
 
-# Test linearis and get team key
-TEAM_RESPONSE=$(linearis issues list -l 1 2>&1)
+# Test linearis connection and get teams
+echo "  Testing Linear API connection..."
+TEAMS_RESPONSE=$(linearis teams list 2>&1)
 if [ $? -eq 0 ]; then
   echo "  ✓ Successfully connected to Linear API"
 
-  # Extract team key from response
-  TEAM_KEY=$(echo "$TEAM_RESPONSE" | jq -r '.[0].team.key')
+  # Count teams
+  TEAM_COUNT=$(echo "$TEAMS_RESPONSE" | jq '. | length')
 
-  if [ -n "$TEAM_KEY" ]; then
-    echo "  ✓ Detected team key: $TEAM_KEY"
+  if [ "$TEAM_COUNT" -eq 0 ]; then
+    echo "  ⚠️  No teams found in your Linear workspace"
+    echo "     Please check your API token permissions"
+  elif [ "$TEAM_COUNT" -eq 1 ]; then
+    # Single team - auto-configure
+    TEAM_KEY=$(echo "$TEAMS_RESPONSE" | jq -r '.[0].key')
+    TEAM_NAME=$(echo "$TEAMS_RESPONSE" | jq -r '.[0].name')
+    echo "  ✓ Detected team: $TEAM_NAME ($TEAM_KEY)"
 
     # Save team key to .env.local if not already there
     if grep -q "^LINEAR_TEAM_KEY=" .env.local; then
@@ -137,8 +168,35 @@ if [ $? -eq 0 ]; then
       echo "  ✓ Saved LINEAR_TEAM_KEY to .env.local"
     fi
   else
-    echo "  ⚠️  Could not auto-detect team key"
-    echo "     You may need to specify --team manually when creating issues"
+    # Multiple teams - prompt user to choose
+    echo "  Found $TEAM_COUNT teams in your workspace:"
+    echo ""
+    echo "$TEAMS_RESPONSE" | jq -r '.[] | "    • \(.key): \(.name)"'
+    echo ""
+    read -p "  Enter the team key to use (e.g., BET): " TEAM_KEY
+
+    if [ -n "$TEAM_KEY" ]; then
+      # Validate team key exists
+      VALID_TEAM=$(echo "$TEAMS_RESPONSE" | jq -r --arg key "$TEAM_KEY" '.[] | select(.key == $key) | .key')
+
+      if [ -n "$VALID_TEAM" ]; then
+        # Save team key to .env.local
+        if grep -q "^LINEAR_TEAM_KEY=" .env.local; then
+          sed "s/^LINEAR_TEAM_KEY=.*/LINEAR_TEAM_KEY=$TEAM_KEY/" .env.local > .env.local.tmp
+          mv .env.local.tmp .env.local
+          echo "  ✓ Updated LINEAR_TEAM_KEY in .env.local"
+        else
+          echo "LINEAR_TEAM_KEY=$TEAM_KEY" >> .env.local
+          echo "  ✓ Saved LINEAR_TEAM_KEY to .env.local"
+        fi
+      else
+        echo "  ⚠️  Invalid team key: $TEAM_KEY"
+        echo "     You may need to specify --team manually when creating issues"
+      fi
+    else
+      echo "  ⚠️  No team key entered"
+      echo "     You may need to specify --team manually when creating issues"
+    fi
   fi
 
   echo ""
@@ -147,10 +205,16 @@ if [ $? -eq 0 ]; then
   echo "Next steps:"
   echo "  • List issues:  linearis issues list"
   echo "  • Read issue:   linearis issues read BET-123"
-  echo "  • Create issue: linearis issues create \"Issue title\" --team $TEAM_KEY"
+  if [ -n "$TEAM_KEY" ]; then
+    echo "  • Create issue: linearis issues create \"Issue title\" --team $TEAM_KEY"
+  else
+    echo "  • Create issue: linearis issues create \"Issue title\" --team YOUR_TEAM_KEY"
+  fi
   echo "  • Or just ask Claude to manage Linear issues!"
 else
   echo "  ⚠️  Failed to connect to Linear API"
+  echo "     Error: $TEAMS_RESPONSE"
+  echo ""
   echo "     Please verify your token is correct."
   echo ""
   echo "To update token, delete the LINEAR_API_TOKEN line from .env.local"

@@ -17,5 +17,5 @@ The script will:
 Run this command:
 
 ```bash
-bash ~/.claude/plugins/cache/linear-lifecycle/skills/linear-lifecycle/scripts/setup.sh
+bash ~/.claude/plugins/marketplaces/skillset/plugins/linear-lifecycle/skills/linear-lifecycle/scripts/setup.sh
 ```

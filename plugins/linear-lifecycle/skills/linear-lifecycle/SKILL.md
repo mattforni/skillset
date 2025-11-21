@@ -13,7 +13,7 @@ description: Use when working with Linear issues across development workflow - u
 
 **Context savings:** 100% - no MCP loaded, just bash commands with JSON output.
 
-## Setup (One-Time Per Project)
+## Setup (One Time)
 
 **Automated setup (recommended):**
 
@@ -23,12 +23,8 @@ This script will:
 
 1. Install Linearis CLI if not present
 2. Prompt for your Linear API token
-3. Auto-detect your team key from Linear
-4. Save both to `.env.local`:
-   - `LINEAR_API_TOKEN=lin_api_...`
-   - `LINEAR_TEAM_KEY=team`
-5. Add `.env.local` to `.gitignore`
-6. Verify connection to Linear API
+3. Save token to `~/.linear_api_token` (linearis standard location)
+4. Verify connection to Linear API
 
 **Manual setup:**
 
@@ -36,21 +32,17 @@ This script will:
 # 1. Install Linearis
 npm install -g linearis
 
-# 2. Add token and team key to .env.local
-echo "LINEAR_API_TOKEN=your-workspace-api-token" >> .env.local
-echo "LINEAR_TEAM_KEY=team" >> .env.local
-
-# 3. Gitignore it
-echo ".env.local" >> .gitignore
+# 2. Save your token to ~/.linear_api_token
+echo "lin_api_YOUR_TOKEN_HERE" > ~/.linear_api_token
+chmod 600 ~/.linear_api_token
 ```
 
-**Why project-local .env.local:**
+**Why ~/.linear_api_token:**
 
-- Each project has its own workspace token
-- No manual workspace switching needed
-- Token auto-detected from current directory
-- Never committed to git (in .gitignore)
-- Same pattern used for other secrets (Supabase, etc.)
+- Linearis automatically reads from this file (no environment variables needed)
+- Global setup works for all projects
+- Simple one time configuration
+- File permissions protect your token (chmod 600)
 
 ## When to Use
 
@@ -67,69 +59,13 @@ echo ".env.local" >> .gitignore
 - Issue tracking not needed for current work
 - Working on non-Linear projects
 
-## Workflow Integration
-
-### Workspace Detection (First Time Only)
-
-**On first Linear operation in a session:**
-
-1. Check if `.env.local` exists in current directory
-2. If yes, source it to load `LINEAR_API_TOKEN`
-3. If no or token not found, ask user for token and save to `.env.local`
-4. Verify token works with a quick linearis call
-
-**Implementation:**
-
-```bash
-# Check for .env.local and load it
-if [ -f .env.local ]; then
-  source .env.local
-fi
-
-# If still not set, prompt user
-if [ -z "$LINEAR_API_TOKEN" ]; then
-  # Ask user for token
-  # Save to .env.local: echo "LINEAR_API_TOKEN=..." >> .env.local
-  # Ensure .gitignored
-fi
-```
-
-**Response pattern:**
-
-```markdown
-Found LINEAR_API_TOKEN in .env.local
-Using Linear workspace for this project.
-Proceeding with [operation]...
-```
-
-**If token not found:**
-
-```markdown
-⚠️ LINEAR_API_TOKEN not found in .env.local
-
-Run the setup script to configure Linear for this project:
-  ~/.claude/plugins/marketplaces/skillset/plugins/linear-lifecycle/skills/linear-lifecycle/scripts/setup.sh
-
-Or manually:
-  Get token from: Linear Settings → Security & Access → Personal API keys
-  Then: echo "LINEAR_API_TOKEN=your-token" >> .env.local
-```
-
-**Subsequent operations:** Token already loaded from .env.local, proceed directly.
-
 ## Implementation
 
-**IMPORTANT: Source .env.local ONCE at the start of any Linear operation:**
-
-```bash
-source .env.local
-```
-
-This loads LINEAR_API_TOKEN and LINEAR_TEAM_KEY into the environment for all subsequent linearis commands. Do this once per skill invocation, not before every command.
+Linearis automatically reads your token from `~/.linear_api_token`. No environment variable loading needed!
 
 ### Creating a New Issue
 
-**IMPORTANT: Keep it simple! Use $LINEAR_TEAM_KEY from .env.local. Never use --labels or --priority.**
+**IMPORTANT: Keep it simple! Specify the team key directly. Never use --labels or --priority.**
 
 **User request:** "Create a Linear issue for fixing the avatar crop bug"
 
@@ -137,17 +73,16 @@ This loads LINEAR_API_TOKEN and LINEAR_TEAM_KEY into the environment for all sub
 
 ```bash
 linearis issues create "Fix avatar crop bug" \
-  --team "$LINEAR_TEAM_KEY" \
+  --team BET \
   --description "Avatar images are cropping incorrectly on mobile devices. Need to adjust aspect ratio handling."
 ```
 
 **Key rules:**
 
-- ✅ Use `--team "$LINEAR_TEAM_KEY"` (auto-detected during setup)
+- ✅ Use `--team TEAM_KEY` (get from user's Linear workspace, e.g. BET, ENG, etc.)
 - ✅ Keep description clear and concise
 - ❌ NEVER use --labels (causes errors)
 - ❌ NEVER use --priority (unnecessary)
-- ❌ NEVER hardcode team key (use variable)
 
 **Parse response:**
 
@@ -265,20 +200,14 @@ linearis issues update BET-789 --state "Done"
 
 | Operation | Command Pattern |
 |-----------|----------------|
-| Source environment | `source .env.local` (once per skill invocation) |
 | List recent issues | `linearis issues list -l 10` |
 | Get issue details | `linearis issues read ABC-123` |
-| Create issue | `linearis issues create "Title" --team "$LINEAR_TEAM_KEY" --description "Description"` |
+| Create issue | `linearis issues create "Title" --team TEAM_KEY --description "Description"` |
 | Update status | `linearis issues update ABC-123 --state "In Progress"` |
 | Add comment | `linearis comments create ABC-123 --body "Comment text"` |
 | Search issues | `linearis issues search "query"` |
 
 ## Common Mistakes
-
-**Forgetting workspace detection**
-
-- ❌ Don't skip LINEAR_API_TOKEN check on first operation
-- ✅ Always verify workspace once per session
 
 **Not parsing JSON output**
 

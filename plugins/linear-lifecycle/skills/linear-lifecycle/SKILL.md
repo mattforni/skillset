@@ -13,40 +13,26 @@ description: Use when working with Linear issues across development workflow - u
 
 **Context savings:** 100% - no MCP loaded, just bash commands with JSON output.
 
-## Setup (One Time)
+## Setup
 
-**Automated setup (recommended):**
+**One-time dependencies install:**
 
-Use the `/linear-setup` command in Claude Code to run the setup interactively.
+Use `/linear-setup` to install Linearis CLI (required for this skill to work).
 
-This script will:
+**Token configuration:**
 
-1. Install Linearis CLI if not present
-2. Prompt for your Linear API token
-3. Save token to `~/.linear_api_token` (linearis standard location)
-4. Verify connection to Linear API
+Automatic! On first use, Claude will:
 
-**Manual setup:**
+1. Check if `~/.linear_api_token` exists
+2. If not, prompt you for your Linear API token
+3. Save it to `~/.linear_api_token` with secure permissions
+4. Verify the connection works
 
-```bash
-# 1. Install Linearis
-npm install -g linearis
-
-# 2. Save your token to ~/.linear_api_token
-echo "lin_api_YOUR_TOKEN_HERE" > ~/.linear_api_token
-chmod 600 ~/.linear_api_token
-```
-
-**Why ~/.linear_api_token:**
-
-- Linearis automatically reads from this file (no environment variables needed)
-- Global setup works for all projects
-- Simple one time configuration
-- File permissions protect your token (chmod 600)
+**Get your token:** Linear Settings → Security & Access → Personal API keys
 
 ## When to Use
 
-**Use this pattern when:**
+**Use this skill when:**
 
 - Starting work on a Linear issue (need issue details)
 - Creating new issues from bugs or features discovered
@@ -61,7 +47,23 @@ chmod 600 ~/.linear_api_token
 
 ## Implementation
 
-Linearis automatically reads your token from `~/.linear_api_token`. No environment variable loading needed!
+**IMPORTANT: Always check for token on first Linear operation in a skill invocation:**
+
+```bash
+# Check if token exists
+if [ ! -f ~/.linear_api_token ]; then
+  echo "⚠️  Linear API token not found."
+  echo ""
+  echo "Get your token from: Linear Settings → Security & Access → Personal API keys"
+  echo ""
+  # Use AskUserQuestion tool to prompt for token
+  # Save response to ~/.linear_api_token
+  # Set permissions: chmod 600 ~/.linear_api_token
+  # Verify it works with: linearis issues list -l 1
+fi
+```
+
+After token is confirmed, proceed with Linear operations. Linearis automatically reads from `~/.linear_api_token`.
 
 ### Creating a New Issue
 

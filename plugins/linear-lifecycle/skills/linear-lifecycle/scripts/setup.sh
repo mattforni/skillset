@@ -138,22 +138,16 @@ echo "Step 4: Verifying setup and detecting team..."
 # Load token from .env.local
 source .env.local
 
-# Test linearis connection and get teams
-echo "  Testing Linear API connection..."
-TEAMS_RESPONSE=$(linearis teams list 2>&1)
+# Test linearis and get team key from recent issue
+TEAM_RESPONSE=$(linearis issues list -l 1 2>&1)
 if [ $? -eq 0 ]; then
   echo "  ✓ Successfully connected to Linear API"
 
-  # Count teams
-  TEAM_COUNT=$(echo "$TEAMS_RESPONSE" | jq '. | length')
+  # Extract team key from response
+  TEAM_KEY=$(echo "$TEAM_RESPONSE" | jq -r '.[0].team.key')
 
-  if [ "$TEAM_COUNT" -eq 0 ]; then
-    echo "  ⚠️  No teams found in your Linear workspace"
-    echo "     Please check your API token permissions"
-  elif [ "$TEAM_COUNT" -eq 1 ]; then
-    # Single team - auto-configure
-    TEAM_KEY=$(echo "$TEAMS_RESPONSE" | jq -r '.[0].key')
-    TEAM_NAME=$(echo "$TEAMS_RESPONSE" | jq -r '.[0].name')
+  if [ -n "$TEAM_KEY" ] && [ "$TEAM_KEY" != "null" ]; then
+    TEAM_NAME=$(echo "$TEAM_RESPONSE" | jq -r '.[0].team.name')
     echo "  ✓ Detected team: $TEAM_NAME ($TEAM_KEY)"
 
     # Save team key to .env.local if not already there
@@ -168,35 +162,8 @@ if [ $? -eq 0 ]; then
       echo "  ✓ Saved LINEAR_TEAM_KEY to .env.local"
     fi
   else
-    # Multiple teams - prompt user to choose
-    echo "  Found $TEAM_COUNT teams in your workspace:"
-    echo ""
-    echo "$TEAMS_RESPONSE" | jq -r '.[] | "    • \(.key): \(.name)"'
-    echo ""
-    read -p "  Enter the team key to use (e.g., BET): " TEAM_KEY
-
-    if [ -n "$TEAM_KEY" ]; then
-      # Validate team key exists
-      VALID_TEAM=$(echo "$TEAMS_RESPONSE" | jq -r --arg key "$TEAM_KEY" '.[] | select(.key == $key) | .key')
-
-      if [ -n "$VALID_TEAM" ]; then
-        # Save team key to .env.local
-        if grep -q "^LINEAR_TEAM_KEY=" .env.local; then
-          sed "s/^LINEAR_TEAM_KEY=.*/LINEAR_TEAM_KEY=$TEAM_KEY/" .env.local > .env.local.tmp
-          mv .env.local.tmp .env.local
-          echo "  ✓ Updated LINEAR_TEAM_KEY in .env.local"
-        else
-          echo "LINEAR_TEAM_KEY=$TEAM_KEY" >> .env.local
-          echo "  ✓ Saved LINEAR_TEAM_KEY to .env.local"
-        fi
-      else
-        echo "  ⚠️  Invalid team key: $TEAM_KEY"
-        echo "     You may need to specify --team manually when creating issues"
-      fi
-    else
-      echo "  ⚠️  No team key entered"
-      echo "     You may need to specify --team manually when creating issues"
-    fi
+    echo "  ⚠️  Could not auto-detect team key"
+    echo "     You may need to specify --team manually when creating issues"
   fi
 
   echo ""
